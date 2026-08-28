@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rapport de surveillance boursière — France</title>
+<style>
+  :root{
+    --bg:#f4f6f9; --card:#ffffff; --ink:#16202c; --mut:#5b6b7c; --line:#e3e9f0;
+    --blue:#1f6feb; --blue-soft:#e8f1fe; --green:#0a9b6c; --red:#d64550; --amber:#b8860b;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--bg); color:var(--ink); font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif; line-height:1.6; padding:24px 16px 40px;}
+  .wrap{max-width:1120px; margin:0 auto;}
+  header.hero{background:linear-gradient(135deg,#0f2a4d 0%,#16406f 60%,#1f6feb 100%); color:#fff; border-radius:16px; padding:28px 30px; margin-bottom:22px;}
+  header.hero h1{font-size:26px; font-weight:700; letter-spacing:.2px;}
+  header.hero .sub{opacity:.92; margin-top:6px; font-size:14px;}
+  .badge{display:inline-block; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.35); border-radius:999px; padding:2px 12px; font-size:12.5px; margin-right:8px;}
+  h2.sec{font-size:19px; margin:30px 0 14px; padding-left:12px; border-left:4px solid var(--blue); color:var(--ink);}
+  .grid{display:grid; gap:16px;}
+  .g3{grid-template-columns:repeat(3,1fr);}
+  .g2{grid-template-columns:repeat(2,1fr);}
+  @media(max-width:860px){.g3,.g2{grid-template-columns:1fr;}}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px 18px; box-shadow:0 1px 3px rgba(16,32,54,.06);}
+  .card h3{font-size:15.5px; margin-bottom:8px; color:#22344a;}
+  .idx-name{font-size:13px; color:var(--mut);}
+  .idx-close{font-size:25px; font-weight:700; margin-top:2px;}
+  .up{color:var(--green);} .down{color:var(--red);}
+  .idx-extra{font-size:12px; color:var(--mut); margin-top:4px;}
+  .chart{width:100%; height:380px;}
+  .chart-sm{width:100%; height:330px;}
+  .kpi{display:flex; flex-wrap:wrap; gap:10px; margin-top:4px;}
+  .kpi .pill{background:var(--blue-soft); color:var(--blue); border-radius:10px; padding:8px 12px; font-size:12.5px; min-width:118px;}
+  .kpi .pill b{display:block; font-size:16px; margin-top:2px;}
+  .kpi .pill.bear{background:#fdecec; color:var(--red);}
+  .kpi .pill.bull{background:#eafaf2; color:var(--green);}
+  ul.news{list-style:none;}
+  ul.news li{padding:13px 4px; border-bottom:1px dashed var(--line);}
+  ul.news li:last-child{border-bottom:none;}
+  .tag{display:inline-block; font-size:11.5px; font-weight:600; border-radius:6px; padding:2px 9px; margin-right:8px; vertical-align:1px;}
+  .tag.maj{background:#eef3ff; color:var(--blue);} .tag.eve{background:#fdf2e3; color:#a26b00;} .tag.soc{background:#eafaf2; color:var(--green);}
+  .tag.mac{background:#efeaff; color:#6d4fc9;} .tag.global{background:#f0f0f0; color:#4a5560;}
+  .news-title{font-weight:600; font-size:14.5px;}
+  .news-desc{font-size:13px; color:#3d4c5e; margin-top:4px;}
+  .src{font-size:11.5px; color:var(--mut); margin-top:5px;}
+  table.scen{width:100%; border-collapse:collapse; font-size:13px; margin-top:6px;}
+  table.scen th,table.scen td{border:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top;}
+  table.scen th{background:#f0f4f9; font-weight:600;}
+  .sig{display:inline-block; padding:3px 12px; border-radius:999px; font-size:12.5px; font-weight:600;}
+  .sig.bear{background:#fdecec; color:var(--red);}
+  .sig.bull{background:#eafaf2; color:var(--green);}
+  .sig.neut{background:#f0f0f0; color:#4a5560;}
+  footer{margin-top:28px; font-size:12px; color:var(--mut); border-top:1px solid var(--line); padding-top:14px;}
+  .note{font-size:12px; color:var(--mut); margin-top:6px;}
+  .pill2{display:inline-block; background:#eef3ff; border-radius:6px; padding:2px 8px; font-size:12px; margin:2px 3px 0 0;}
+  .empty{color:var(--mut); font-size:13px; font-style:italic; padding:6px 0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <h1>Rapport de surveillance du marché boursier français</h1>
+  <div class="sub" style="margin-top:10px;">
+    <span class="badge">&#128197; <span id="dateRapport">—</span></span>
+    <span class="badge">&#128176; Données : Yahoo Finance (Euronext Paris)</span>
+    <span class="badge">&#128278; Générateur : surveillance-bourse-france</span>
+  </div>
+</header>
+
+<!-- ============ SECTION 1 : APERÇU ============ -->
+<h2 class="sec">1 &middot; Aperçu des indices</h2>
+<div class="grid g3" id="idxCards"></div>
+
+<div class="grid g2" style="margin-top:16px;">
+  <div class="card">
+    <h3>Évolution du CAC 40 — 1 an (cours de clôture, MA50 &amp; MA200)</h3>
+    <div id="chartCac" class="chart"></div>
+    <div class="note">Cours de clôture du CAC 40 sur 1 an avec moyennes mobiles 50 et 200 jours (Yahoo Finance).</div>
+  </div>
+  <div class="card">
+    <h3>Performance du CAC 40 par période (%)</h3>
+    <div id="chartPerf" class="chart"></div>
+    <div class="note">Performances calculées sur les cours de clôture (Yahoo Finance).</div>
+  </div>
+</div>
+
+<!-- ============ SECTION 2 : TECHNIQUE ============ -->
+<h2 class="sec">2 &middot; Analyse technique du CAC 40</h2>
+<div class="card">
+  <div style="display:flex; flex-wrap:wrap; align-items:center; gap:10px;" id="techBadges"></div>
+  <div class="kpi" style="margin-top:12px;" id="techKpi"></div>
+  <div class="note" style="margin-top:10px;" id="techNote"></div>
+</div>
+
+<!-- ============ SECTION 3 : ACTUALITÉS ============ -->
+<h2 class="sec">3 &middot; Actualités &amp; faits marquants</h2>
+<div class="card">
+  <ul class="news" id="newsList"></ul>
+  <div class="empty" id="newsEmpty" style="display:none;">Aucune actualité injectée. Utilisez <code>--news actualites.json</code> pour enrichir le rapport.</div>
+</div>
+
+<!-- ============ SECTION 4 : VALEURS ============ -->
+<h2 class="sec">4 &middot; Zoom valeurs (dernière clôture)</h2>
+<div class="grid g2">
+  <div class="card">
+    <h3>Rendement en dividendes par valeur (%)</h3>
+    <div id="chartDiv" class="chart-sm"></div>
+    <div class="note">Rendement annualisé (Yahoo Finance).</div>
+  </div>
+  <div class="card">
+    <h3>Potentiel vs objectif de cours consensus (%)</h3>
+    <div id="chartUp" class="chart-sm"></div>
+    <div class="note">Écart entre objectif moyen des analystes et cours actuel (Yahoo Finance).</div>
+  </div>
+</div>
+<div class="card" style="margin-top:16px;">
+  <h3>Multiples de valorisation — PE trailing vs PE prévisionnel</h3>
+  <div id="chartPe" class="chart" style="height:360px;"></div>
+  <div class="note">PE trailing (12 derniers mois) et PE forward (prévisions consensus).</div>
+</div>
+
+<!-- ============ SECTION 5 : RECOMMANDATIONS ============ -->
+<h2 class="sec">5 &middot; Recommandations à haut rendement (5 valeurs)</h2>
+<div class="card">
+  <p style="font-size:13.5px; margin-bottom:10px;"><b>Méthode :</b> classement par <b>rendement annualisé attendu</b> = <i>rendement du dividende</i> + <i>potentiel vs objectif de cours consensus</i> (Yahoo Finance), en trois scénarios (pessimiste / base / optimiste selon les objectifs bas / moyen / haut des analystes). Sélection des 5 valeurs à plus fort potentiel avec diversification sectorielle.</p>
+  <div id="chartRec" class="chart" style="height:340px;"></div>
+  <div class="note">Trois scénarios par valeur (pessimiste / base / optimiste) en % annualisé attendu.</div>
+</div>
+<div class="grid" style="margin-top:16px; grid-template-columns:repeat(auto-fit,minmax(300px,1fr));" id="recCards"></div>
+
+<!-- ============ SECTION 6 : PORTEFEUILLE ============ -->
+<h2 class="sec">6 &middot; Portefeuille à rendement annualisé maximal (5 valeurs)</h2>
+<div class="grid g2" id="portSection">
+  <div class="card">
+    <h3>Composition du portefeuille (équipondéré)</h3>
+    <div id="chartPort" class="chart" style="height:320px;"></div>
+    <div class="note" id="portSectors"></div>
+  </div>
+  <div class="card">
+    <h3>Rendement annualisé attendu du portefeuille (moyenne équipondérée)</h3>
+    <div id="chartPortBar" class="chart" style="height:200px;"></div>
+    <div class="kpi" style="margin-top:8px;" id="portKpi"></div>
+    <div class="note" style="margin-top:10px;"><b>Construction :</b> valeurs &times; poids égal, diversification sectorielle. Calcul = moyenne des rendements annualisés attendus (dividende + potentiel vs objectif). <b>Modèle d'estimation, pas un engagement de performance</b> ; les objectifs de cours évoluent avec les fondamentaux et le contexte macro.</div>
+  </div>
+</div>
+
+<!-- ============ SECTION 7 : PERSPECTIVES ============ -->
+<h2 class="sec">7 &middot; Perspectives (horizon 3–6 mois)</h2>
+<div class="card">
+  <p style="font-size:13.5px; margin-bottom:10px;"><b>Macro / politique :</b> trajectoire des finances publiques, budget, politique monétaire (BCE / Fed), taux longs et écart OAT-Bund. À compléter par l'analyste avec les actualités récentes.</p>
+  <p style="font-size:13.5px; margin-bottom:10px;" id="techPhrase"></p>
+  <p style="font-size:13.5px; margin-bottom:12px;"><b>Opportunités structurelles :</b> valeurs défensives à rendement, luxe en rebond technique, chaîne électricité / IA (à adapter au contexte).</p>
+  <table class="scen">
+    <tr><th>Scénario</th><th>Conditions de déclenchement (à affiner)</th><th>Fourchette cible</th><th>Signaux de confirmation / infirmation</th></tr>
+    <tr>
+      <td><b>Optimiste</b> <span class="up">&#9650;</span></td>
+      <td>Apaisement budgétaire, détente des taux, reprise de la demande mondiale</td>
+      <td id="scenOpt"><b>—</b></td>
+      <td>Franchissement durable de la résistance (MA20 puis plus haut 52 sem.)</td>
+    </tr>
+    <tr>
+      <td><b>Base</b> <span class="pill2" style="background:#fdf2e3;color:#a26b00;">&#9632;</span></td>
+      <td>Incertitude persistante sans choc ; politiques monétaires sans surprise</td>
+      <td id="scenBase"><b>—</b></td>
+      <td>Oscillation entre support et résistance ; volatilité contenue</td>
+    </tr>
+    <tr>
+      <td><b>Pessimiste</b> <span class="down">&#9660;</span></td>
+      <td>Choc budgétaire, hausse des taux, dégradation de la note souveraine</td>
+      <td id="scenPes"><b>—</b></td>
+      <td>Perte du support puis de la MA200 ; écart OAT-Bund qui se creuse</td>
+    </tr>
+  </table>
+</div>
+
+<footer>
+  <b>Méthodologie &amp; avertissements.</b> Données de marché : Yahoo Finance, clôture de la dernière séance (Euronext Paris). PE/PB/rendements/objectifs : module quoteSummary (consensus d'analystes). Les rendements annualisés attendus sont des <b>estimations de modèle</b> (dividende + potentiel vs objectif) et non des engagements de performance ; les objectifs de cours évoluent avec les fondamentaux et le contexte macro. <b>Information à titre indicatif — ne constitue pas un conseil en investissement.</b> Tout investissement comporte un risque de perte en capital.
+</footer>
+
+</div>
+
+<script>
+window.DATA = __DONNEES__;
+</script>
+<script>__ECHARTS_LIB__</script>
+<script>
+(function () {
+  'use strict';
+  var D = window.DATA || {};
+  if (!D || typeof echarts === 'undefined') {
+    var els = document.querySelectorAll('.chart, .chart-sm');
+    for (var k = 0; k < els.length; k++) { els[k].innerHTML = '<p style="padding:20px;color:#888;">Chargement des graphiques impossible.</p>'; }
+    return;
+  }
+
+  // --- Date du rapport ---
+  var dEl = document.getElementById('dateRapport');
+  if (dEl && D.as_of) { dEl.textContent = D.as_of; }
+
+  // --- Cartes indices ---
+  var cardHtml = '';
+  if (D.indices) {
+    for (var i = 0; i < D.indices.length; i++) {
+      var ix = D.indices[i];
+      var cls = (ix.change_pct !== null && ix.change_pct !== undefined) ? (ix.change_pct >= 0 ? 'up' : 'down') : '';
+      var arrow = (ix.change_pct !== null && ix.change_pct !== undefined) ? (ix.change_pct >= 0 ? '&#9650;' : '&#9660;') : '';
+      var chg = (ix.change_pct !== null && ix.change_pct !== undefined) ? (ix.change_pct >= 0 ? '+' : '') + Number(ix.change_pct).toFixed(2) + ' %' : 'N/A';
+      cardHtml += '<div class="card"><div class="idx-name">' + ix.name + '</div>' +
+        '<div class="idx-close ' + cls + '">' + Number(ix.price).toLocaleString('fr-FR') + ' <span style="font-size:14px;">' + arrow + ' ' + chg + '</span></div>' +
+        '<div class="idx-extra">Haut 52 sem. ' + (ix.high52 != null ? Number(ix.high52).toLocaleString('fr-FR') : 'N/A') + ' &middot; Bas ' + (ix.low52 != null ? Number(ix.low52).toLocaleString('fr-FR') : 'N/A') + '</div></div>';
+    }
+  }
+  document.getElementById('idxCards').innerHTML = cardHtml;
+
+  var AXIS = { color: '#5b6b7c', fontSize: 11 };
+  var TIP = { trigger: 'axis', triggerOn: 'click', renderMode: 'richText', confine: true,
+    textStyle: { fontSize: 11, lineHeight: 15 }, padding: [6, 8] };
+
+  function baseChart(id, extra) {
+    var el = document.getElementById(id);
+    if (!el) { return null; }
+    var c = echarts.init(el);
+    el._ec = c;
+    var opt = {
+      backgroundColor: 'transparent',
+      grid: { left: 52, right: 18, top: 34, bottom: 44, containLabel: true },
+      xAxis: { type: 'category', axisLabel: AXIS },
+      yAxis: { type: 'value', axisLabel: AXIS, splitLine: { lineStyle: { color: '#eef1f5' } } }
+    };
+    for (var p in extra) { if (extra.hasOwnProperty(p)) { opt[p] = extra[p]; } }
+    if (!opt.tooltip) { opt.tooltip = TIP; }
+    c.setOption(opt);
+    return c;
+  }
+
+  // ---- Graphique 1 : CAC 40 1 an + MA50/MA200 ----
+  if (D.cac40) {
+    var cd = D.cac40;
+    var x = cd.dates.map(function (t) { return t.slice(5); });
+    baseChart('chartCac', {
+      tooltip: Object.assign({}, TIP, { formatter: function (params) {
+        var s = params[0].axisValue + '<br/>';
+        for (var i = 0; i < params.length; i++) {
+          var p = params[i];
+          if (!p || !p.seriesName || p.value === null || p.value === undefined) { continue; }
+          s += p.marker + ' ' + p.seriesName + ' : ' + Number(p.value).toLocaleString('fr-FR') + ' pts<br/>';
+        }
+        return s;
+      }}),
+      legend: { top: 0, left: 4, itemWidth: 14, itemHeight: 8, textStyle: { color: '#5b6b7c', fontSize: 11 } },
+      xAxis: { type: 'category', data: x, boundaryGap: false, axisLabel: AXIS },
+      yAxis: { type: 'value', scale: true, axisLabel: AXIS, splitLine: { lineStyle: { color: '#eef1f5' } } },
+      dataZoom: [ { type: 'inside', start: 20, end: 100 }, { type: 'slider', start: 20, end: 100, height: 18, bottom: 6 } ],
+      series: [
+        { name: 'CAC 40', type: 'line', data: cd.close, smooth: true, showSymbol: false,
+          lineStyle: { color: '#1f6feb', width: 2 }, itemStyle: { color: '#1f6feb' },
+          areaStyle: { color: 'rgba(31,111,235,0.10)' } },
+        { name: 'MA50', type: 'line', data: cd.ma50, showSymbol: false, smooth: true,
+          lineStyle: { color: '#d97b1f', width: 1.5 }, itemStyle: { color: '#d97b1f' } },
+        { name: 'MA200', type: 'line', data: cd.ma200, showSymbol: false, smooth: true,
+          lineStyle: { color: '#6b7280', width: 1.2, type: 'dashed' }, itemStyle: { color: '#6b7280' } }
+      ]
+    });
+  }
+
+  // ---- Graphique 2 : performance par période ----
+  if (D.tech_info && D.tech_info.perf) {
+    var pf = D.tech_info.perf;
+    var perfData = [
+      { v: pf['1w'], n: '1 semaine' }, { v: pf['1m'], n: '1 mois' }, { v: pf['3m'], n: '3 mois' },
+      { v: pf['6m'], n: '6 mois' }, { v: pf['1y'], n: '1 an' }, { v: pf['ytd'], n: 'YTD' }
+    ];
+    baseChart('chartPerf', {
+      tooltip: Object.assign({}, TIP, { valueFormatter: function (v) { return v + ' %'; } }),
+      xAxis: { type: 'category', data: perfData.map(function (d) { return d.n; }), axisLabel: AXIS },
+      yAxis: { type: 'value', name: '%', nameTextStyle: AXIS, axisLabel: AXIS, splitLine: { lineStyle: { color: '#eef1f5' } } },
+      series: [{ type: 'bar', barWidth: 42, data: perfData.map(function (d) {
+        return { value: d.v, itemStyle: { color: d.v >= 0 ? '#0a9b6c' : '#d64550', borderRadius: [5, 5, 0, 0] } };
+      }), label: { show: true, position: 'top', formatter: function (p) { return p.value + ' %'; }, color: '#22344a', fontSize: 11 } }]
+    });
+  }
+
+  // ---- Section technique (KPI) ----
+  if (D.tech_info && D.tech_info.tech) {
+    var t = D.tech_info.tech;
+    var sigCls = t.signal === 'haussière' ? 'bull' : (t.signal === 'baissière' ? 'bear' : 'neut');
+    var sigTxt = t.signal || 'n/d';
+    var badges = '<span class="sig ' + sigCls + '">Signal court terme : ' + sigTxt + '</span>';
+    badges += '<span class="pill2">Prix vs MA20 (' + fmtN(t.ma20) + ')</span>';
+    badges += '<span class="pill2">MA50 (' + fmtN(t.ma50) + ')</span>';
+    badges += '<span class="pill2">MA200 (' + fmtN(t.ma200) + ')</span>';
+    badges += '<span class="pill2">RSI14 &asymp; ' + fmtN(t.rsi, 1) + '</span>';
+    badges += '<span class="pill2">MACD hist. ' + fmtN(t.macd_hist) + '</span>';
+    document.getElementById('techBadges').innerHTML = badges;
+    var kpi = '';
+    kpi += pill('MA 20 jours', fmtN(t.ma20));
+    kpi += pill('MA 50 jours', fmtN(t.ma50));
+    kpi += pill('MA 200 jours', fmtN(t.ma200));
+    kpi += pill('RSI 14 jours', fmtN(t.rsi, 1));
+    kpi += pill('MACD hist.', fmtN(t.macd_hist));
+    kpi += pill('Support 3 mois', fmtN(t.support));
+    kpi += pill('Résistance 3 mois', fmtN(t.resistance));
+    document.getElementById('techKpi').innerHTML = kpi;
+    var reasons = (t.reasons || []).map(function (r) { return r; }).join(' · ');
+    document.getElementById('techNote').innerHTML = 'Interprétation : ' + reasons + '.';
+    if (document.getElementById('techPhrase')) {
+      document.getElementById('techPhrase').innerHTML = '<b>Technique :</b> signal ' + sigTxt +
+        '. Support clé : <b>' + fmtN(t.support) + '</b>, puis MA200 (' + fmtN(t.ma200) + '). Résistance : <b>' + fmtN(t.resistance) + '</b> (plus haut 52 sem. ' + fmtN(t.high52) + ').';
+    }
+  }
+
+  // ---- Section actualités ----
+  var newsList = document.getElementById('newsList');
+  if (D.news && D.news.length) {
+    var nl = '';
+    for (var n = 0; n < D.news.length; n++) {
+      var it = D.news[n];
+      var tag = it.tag || 'NEWS';
+      var tagCls = { 'MAJOR': 'maj', 'BUDGET': 'eve', 'SOCIÉTÉ': 'soc', 'MACRO': 'mac', 'GLOBAL': 'global' }[String(tag).toUpperCase()] || 'global';
+      nl += '<li><span class="tag ' + tagCls + '">' + String(tag).toUpperCase() + '</span><span class="news-title">' + (it.titre || it.title || '') + '</span>' +
+        '<div class="news-desc">' + (it.description || '') + '</div>' +
+        (it.source ? '<div class="src">Source : ' + it.source + '</div>' : '') + '</li>';
+    }
+    newsList.innerHTML = nl;
+  } else {
+    document.getElementById('newsEmpty').style.display = 'block';
+  }
+
+  // ---- Valeurs : graphiques 3-5 ----
+  if (D.stocks && D.stocks.length) {
+    var st = D.stocks.filter(function (s) { return s.price != null; });
+    var divData = st.map(function (s) { return { name: s.name, v: ((s.div_yield || 0) * 100) }; })
+      .sort(function (a, b) { return b.v - a.v; });
+    baseChart('chartDiv', {
+      tooltip: Object.assign({}, TIP, { trigger: 'item', valueFormatter: function (v) { return v.toFixed(2) + ' %'; } }),
+      grid: { left: 12, right: 46, top: 10, bottom: 20, containLabel: true },
+      xAxis: { type: 'value', name: '%', nameTextStyle: AXIS, axisLabel: AXIS, splitLine: { lineStyle: { color: '#eef1f5' } } },
+      yAxis: { type: 'category', data: divData.map(function (d) { return d.name; }), axisLabel: { color: '#3d4c5e', fontSize: 11 } },
+      series: [{ type: 'bar', barWidth: 13, data: divData.map(function (d, idx) {
+        return { value: d.v, itemStyle: { color: idx < 3 ? '#1f6feb' : '#7fb0f0', borderRadius: [0, 4, 4, 0] } };
+      }), label: { show: true, position: 'right', formatter: function (p) { return p.value.toFixed(2) + ' %'; }, color: '#22344a', fontSize: 10.5 } }]
+    });
+    var upData = st.map(function (s) {
+      return { name: s.name, v: (s.target_mean && s.price) ? ((s.target_mean - s.price) / s.price * 100) : null };
+    }).filter(function (d) { return d.v != null; }).sort(function (a, b) { return b.v - a.v; });
+    baseChart('chartUp', {
+      tooltip: Object.assign({}, TIP, { trigger: 'item', valueFormatter: function (v) { return (v > 0 ? '+' : '') + v.toFixed(1) + ' %'; } }),
+      grid: { left: 12, right: 46, top: 10, bottom: 20, containLabel: true },
+      xAxis: { type: 'value', name: '%', nameTextStyle: AXIS, axisLabel: AXIS, splitLine: { lineStyle: { color: '#eef1f5' } } },
+      yAxis: { type: 'category', data: upData.map(function (d) { return d.name; }), axisLabel: { color: '#3d4c5e', fontSize: 11 } },
+      series: [{ type: 'bar', barWidth: 13, data: upData.map(function (d, idx) {
+        return { value: d.v, itemStyle: { color: idx < 3 ? '#0a9b6c' : '#5ec9a3', borderRadius: [0, 4, 4, 0] } };
+      }), label: { show: true, position: 'right', formatter: function (p) { return (p.value > 0 ? '+' : '') + p.value.toFixed(1) + ' %'; }, color: '#22344a', fontSize: 10.5 } }]
+    });
+    var peNames = st.map(function (s) { return s.name; });
+    var peTrail = st.map(function (s) { return s.pe_trailing; });
+    var peFwd = st.map(function (s) { return s.pe_forward; });
+    baseChart('chartPe', {
+      tooltip: Object.assign({}, TIP, { valueFormatter: function (v) { return v + 'x'; } }),
+      legend: { top: 0, left: 4, itemWidth: 14, itemHeight: 8, textStyle: { color: '#5b6b7c', fontSize: 11 } },
+      xAxis: { type: 'category', data: peNames, axisLabel: { color: '#3d4c5e', fontSize: 10.5, interval: 0, rotate: 28 } },
+      yAxis: { type: 'value', name: 'PE (x)', nameTextStyle: AXIS, axisLabel: AXIS, splitLine: { lineStyle: { color: '#eef1f5' } } },
+      series: [
+        { name: 'PE trailing', type: 'bar', barWidth: 16, data: peTrail, itemStyle: { color: '#1f6feb', borderRadius: [4, 4, 0, 0] } },
+        { name: 'PE prévisionnel', type: 'bar', barWidth: 16, data: peFwd, itemStyle: { color: '#a4c8f8', borderRadius: [4, 4, 0, 0] } }
+      ]
+    });
+  }
+
+  // ---- Section 5 : recommandations ----
+  if (D.rec5 && D.rec5.length) {
+    var recData = D.rec5;
+    baseChart('chartRec', {
+      tooltip: Object.assign({}, TIP, { valueFormatter: function (v) { return v + ' %'; } }),
+      legend: { top: 0, left: 4, itemWidth: 14, itemHeight: 8, textStyle: { color: '#5b6b7c', fontSize: 11 } },
+      grid: { left: 12, right: 46, top: 34, bottom: 20, containLabel: true },
+      xAxis: { type: 'value', name: '%', nameTextStyle: AXIS, axisLabel: AXIS, splitLine: { lineStyle: { color: '#eef1f5' } } },
+      yAxis: { type: 'category', data: recData.map(function (r) { return r.name; }), axisLabel: { color: '#3d4c5e', fontSize: 11 } },
+      series: [
+        { name: 'Pessimiste', type: 'bar', barWidth: 11, data: recData.map(function (r) { return r.exp_p; }), itemStyle: { color: '#d64550', borderRadius: [0, 3, 3, 0] } },
+        { name: 'Base', type: 'bar', barWidth: 11, data: recData.map(function (r) { return r.exp_b; }), itemStyle: { color: '#1f6feb', borderRadius: [0, 3, 3, 0] } },
+        { name: 'Optimiste', type: 'bar', barWidth: 11, data: recData.map(function (r) { return r.exp_o; }), itemStyle: { color: '#0a9b6c', borderRadius: [0, 3, 3, 0] } }
+      ]
+    });
+    var rc = '';
+    for (var ri = 0; ri < recData.length; ri++) {
+      var r5 = recData[ri];
+      rc += '<div class="card"><h3>' + r5.name + ' <span class="tag soc">' + r5.sector + '</span></h3>' +
+        '<div class="idx-extra" style="font-size:13px;"><b>' + r5.position + '</b></div>' +
+        '<div class="idx-extra">Cours ' + fmtN(r5.price, 2) + ' € &middot; Rendement ' + fmtN(r5.dy, 2) + ' % &middot; PE pr&eacute;v. ' + (r5.pe_f != null ? fmtN(r5.pe_f, 1) : 'N/A') + ' &middot; EPS ' + (r5.eps_g != null ? (r5.eps_g > 0 ? '+' : '') + fmtN(r5.eps_g, 1) + ' %' : 'N/A') + '</div>' +
+        '<div class="kpi" style="margin-top:8px;">' +
+        '<div class="pill bear">Pessimiste<b>' + (r5.exp_p > 0 ? '+' : '') + fmtN(r5.exp_p, 1) + ' %</b></div>' +
+        '<div class="pill bull">Base<b>' + (r5.exp_b > 0 ? '+' : '') + fmtN(r5.exp_b, 1) + ' %</b></div>' +
+        '<div class="pill">Optimiste<b>' + (r5.exp_o > 0 ? '+' : '') + fmtN(r5.exp_o, 1) + ' %</b></div></div>' +
+        '<div style="font-size:12.5px; margin-top:8px;"><b>Th&egrave;se :</b> ' + r5.these + '</div>' +
+        '<div style="font-size:12.5px; margin-top:6px; color:var(--red);"><b>Risques :</b> ' + r5.risques + '</div></div>';
+    }
+    document.getElementById('recCards').innerHTML = rc;
+  }
+
+  // ---- Section 6 : portefeuille ----
+  if (D.portfolio) {
+    var pfo = D.portfolio;
+    baseChart('chartPort', {
+      tooltip: Object.assign({}, TIP, { trigger: 'item', valueFormatter: function (v) { return v + ' %'; } }),
+      legend: { bottom: 0, type: 'scroll', itemWidth: 12, itemHeight: 8, textStyle: { color: '#5b6b7c', fontSize: 11 } },
+      series: [{
+        name: 'Poids', type: 'pie', radius: ['42%', '68%'], center: ['50%', '46%'],
+        avoidLabelOverlap: true, label: { formatter: '{b}', color: '#3d4c5e', fontSize: 11 },
+        data: pfo.names.map(function (nm) { return { value: pfo.weight, name: nm }; })
+      }]
+    });
+    baseChart('chartPortBar', {
+      tooltip: Object.assign({}, TIP, { valueFormatter: function (v) { return (v > 0 ? '+' : '') + v + ' %'; } }),
+      grid: { left: 46, right: 18, top: 20, bottom: 24, containLabel: true },
+      xAxis: { type: 'category', data: ['Pessimiste', 'Scénario de base', 'Optimiste'], axisLabel: AXIS },
+      yAxis: { type: 'value', name: '%', nameTextStyle: AXIS, axisLabel: AXIS, splitLine: { lineStyle: { color: '#eef1f5' } } },
+      series: [{ type: 'bar', barWidth: 46, data: [
+        { value: pfo.exp_p, itemStyle: { color: '#d64550', borderRadius: [5, 5, 0, 0] } },
+        { value: pfo.exp_b, itemStyle: { color: '#0a9b6c', borderRadius: [5, 5, 0, 0] } },
+        { value: pfo.exp_o, itemStyle: { color: '#1f6feb', borderRadius: [5, 5, 0, 0] } }
+      ], label: { show: true, position: 'top', formatter: function (p) { return (p.value > 0 ? '+' : '') + p.value + ' %'; }, color: '#22344a', fontSize: 11 } }]
+    });
+    document.getElementById('portKpi').innerHTML =
+      '<div class="pill bear">Pessimiste<b>' + (pfo.exp_p > 0 ? '+' : '') + fmtN(pfo.exp_p, 1) + ' %</b></div>' +
+      '<div class="pill bull">Scénario de base<b>' + (pfo.exp_b > 0 ? '+' : '') + fmtN(pfo.exp_b, 1) + ' %</b></div>' +
+      '<div class="pill">Optimiste<b>' + (pfo.exp_o > 0 ? '+' : '') + fmtN(pfo.exp_o, 1) + ' %</b></div>';
+    var sectors = (D.rec5 || []).map(function (r) { return r.sector; });
+    document.getElementById('portSectors').innerHTML = pfo.names.length + ' valeurs &times; ' + fmtN(pfo.weight, 0) + ' % &middot; Secteurs : ' + (sectors.join(', ') || 'n/d');
+  } else {
+    document.getElementById('portSection').innerHTML = '<div class="card"><div class="empty">Module portefeuille désactivé (--sans-portefeuille).</div></div>';
+  }
+
+  // ---- Section 7 : scénarios ----
+  if (D.scenarios) {
+    document.getElementById('scenOpt').innerHTML = '<b>' + D.scenarios.optimiste + '</b>';
+    document.getElementById('scenBase').innerHTML = '<b>' + D.scenarios.base + '</b>';
+    document.getElementById('scenPes').innerHTML = '<b>' + D.scenarios.pessimiste + '</b>';
+  }
+
+  // --- Helpers ---
+  function pill(lab, val) {
+    return '<div class="pill">' + lab + '<b>' + val + '</b></div>';
+  }
+  function fmtN(v, nd) {
+    if (v === null || v === undefined) { return 'N/A'; }
+    if (nd === undefined) { nd = 2; }
+    return Number(v).toLocaleString('fr-FR', { minimumFractionDigits: nd, maximumFractionDigits: nd });
+  }
+
+  var tid = null;
+  window.addEventListener('resize', function () {
+    if (tid) { clearTimeout(tid); }
+    tid = setTimeout(function () {
+      var ids = ['chartCac', 'chartPerf', 'chartDiv', 'chartUp', 'chartPe', 'chartRec', 'chartPort', 'chartPortBar'];
+      for (var i = 0; i < ids.length; i++) {
+        var el = document.getElementById(ids[i]);
+        if (el && el._ec) { el._ec.resize(); }
+      }
+    }, 150);
+  });
+})();
+</script>
+</body>
+</html>
